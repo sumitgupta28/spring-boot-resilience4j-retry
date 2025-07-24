@@ -2,77 +2,73 @@ package com.example.resilience4j.service;
 
 import com.example.resilience4j.client.MovieApiClient;
 import com.example.resilience4j.entity.Movie;
-import com.example.resilience4j.exception.MovieNotFoundException;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import io.github.resilience4j.retry.RetryRegistry;
-import io.github.resilience4j.retry.annotation.Retry;
-import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 
+import java.time.Duration;
+
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class MovieService {
 
-    @Autowired
-    private RetryRegistry retryRegistry;
+    private final CircuitBreakerRegistry registry;
 
-    @Autowired
-    private MovieApiClient movieApiClient;
 
-    @Retry(name = "simpleRetry")
-    public Movie getMovieDetails(String movieId) {
+    private final MovieApiClient movieApiClient;
+
+    @CircuitBreaker(name = "countBasedCircuitBreaker")
+    public Movie getMovieDetailsWithCountBasedCircuitBreaker(String movieId) {
         return fetchMovieDetails(movieId);
     }
 
-    @Retry(name = "retryWithEventDetails")
-    public Movie getMovieDetailsWithRetryEventDetails(String movieId) {
+    @CircuitBreaker(name = "timeBasedCircuitBreaker")
+    public Movie getMovieDetailsWithTimedBasedCircuitBreaker(String movieId) {
         return fetchMovieDetails(movieId);
     }
 
-    @Retry(name = "simpleRetry", fallbackMethod = "getMovieDetailsFallbackMethod")
-    public Movie getMovieDetailsWithFallback(String movieId) {
+    @CircuitBreaker(name = "circuitBreakerOnException")
+    public Movie getMovieDetailsWithCircuitBreakerOnException(String movieId) {
         return fetchMovieDetails(movieId);
     }
 
-    @Retry(name = "customRetryConfig")
-    public Movie getMovieDetailsWithCustomRetryConfig(String movieId) {
+    @CircuitBreaker(name = "circuitBreakerWithRecordFailurePredicate")
+    public Movie getMovieDetailsWithCircuitBreakerRecordFailurePredicate(String movieId) {
         return fetchMovieDetails(movieId);
     }
 
-    @Retry(name = "retryOnException")
-    public Movie getMovieDetailsRetryOnException(String movieId) {
+    @CircuitBreaker(name = "circuitBreakerWithIgnoreExceptionPredicate")
+    public Movie getMovieDetailsWithCircuitBreakerIgnoreExceptionPredicate(String movieId) {
         return fetchMovieDetails(movieId);
     }
 
-    @Retry(name = "retryBasedOnConditionalPredicate")
-    public Movie getMovieDetailsRetryOnConditionalPredicate(String movieId) {
-        try {
-            return fetchMovieDetails(movieId);
-        } catch (MovieNotFoundException movieNotFoundException) {
-            log.info("Movie not found exception encountered. Returning default value");
-            return new Movie("Default", "N/A", "N/A", 0.0);
-        }
-    }
-
-    @Retry(name = "retryBasedOnExceptionPredicate")
-    public Movie getMovieDetailsRetryOnExceptionPredicate(String movieId) {
+    @CircuitBreaker(name = "circuitBreakerForSlowCalls")
+    public Movie getMovieDetailsWithCircuitBreakerForSlowCalls(String movieId) {
         return fetchMovieDetails(movieId);
     }
 
-    @Retry(name = "retryUsingExponentialBackoff")
-    public Movie getMovieDetailsRetryUsingExponentialBackoff(String movieId) {
+    @CircuitBreaker(name = "countBasedCircuitBreaker", fallbackMethod = "fetchMovieDetailsFallbackMethod")
+    public Movie getMovieDetailsWithFallbackMethod(String movieId) {
         return fetchMovieDetails(movieId);
     }
 
-    @Retry(name = "retryUsingRandomizedWait")
-    public Movie getMovieDetailsRetryUsingRandomizedWait(String movieId) {
+    @CircuitBreaker(name = "customCircuitBreaker")
+    public Movie getMovieDetailsWithCustomCircuitBreaker(String movieId) {
         return fetchMovieDetails(movieId);
+    }
+
+    public Movie fetchMovieDetailsFallbackMethod(String movieId, CallNotPermittedException callNotPermittedException) {
+        log.info("Fallback method called.");
+        log.info("CallNotPermittedException exception message: {}", callNotPermittedException.getMessage());
+        return new Movie("Default", "N/A", "N/A", 0.0);
     }
 
     private Movie fetchMovieDetails(String movieId) {
@@ -95,20 +91,29 @@ public class MovieService {
         return movie;
     }
 
-    private Movie getMovieDetailsFallbackMethod(String movieId, MovieNotFoundException movieNotFoundException) {
-        log.info("Fallback method called.");
-        log.info("Original exception message: {}", movieNotFoundException.getMessage());
-        return new Movie("Default", "N/A", "N/A", 0.0);
-    }
-
     @PostConstruct
     public void postConstruct() {
-        io.github.resilience4j.retry.Retry.EventPublisher eventPublisher = retryRegistry.retry("retryWithEventDetails").getEventPublisher();
-        eventPublisher.onEvent(event -> log.debug("Simple Retry - On Event. Event Details: {} " , event));
-        eventPublisher.onError(event -> log.debug("Simple Retry - On Error. Event Details: {} " , event));
-        eventPublisher.onRetry(event -> log.debug("Simple Retry - On Retry. Event Details: {} " , event));
-        eventPublisher.onSuccess(event -> log.debug("Simple Retry - On Success. Event Details: {} " , event));
-        eventPublisher.onIgnoredError(event -> log.debug("Simple Retry - On Ignored Error. Event Details: {} " , event));
+        var eventPublisher = registry.circuitBreaker("countBasedCircuitBreaker").getEventPublisher();
+        eventPublisher.onEvent(event -> System.out.println("Count Based Circuit Breaker - On Event. Event Details: " + event));
+    }
+
+    void updateCircuitBreakerState(String name) {
+        io.github.resilience4j.circuitbreaker.CircuitBreaker circuitBreaker = registry.circuitBreaker(name);
+        if (name.equalsIgnoreCase("closed")) {
+            circuitBreaker.transitionToClosedState();
+        } else if (name.equalsIgnoreCase("disabled")) {
+            circuitBreaker.transitionToDisabledState();
+        } else if (name.equalsIgnoreCase("forced-open")) {
+            circuitBreaker.transitionToForcedOpenState();
+        } else if (name.equalsIgnoreCase("open")) {
+            circuitBreaker.transitionToOpenState();
+        } else if (name.equalsIgnoreCase("metrics-only")) {
+            circuitBreaker.transitionToMetricsOnlyState();
+        } else if (name.equalsIgnoreCase("half-open")) {
+            circuitBreaker.transitionToHalfOpenState();
+        } else if (name.equalsIgnoreCase("open-for-5-minutes")) {
+            circuitBreaker.transitionToOpenStateFor(Duration.ofMinutes(5));
+        }
     }
 
 }

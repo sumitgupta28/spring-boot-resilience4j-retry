@@ -13,11 +13,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class MockMovieController {
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getMovieById(@PathVariable String id) {
+    public ResponseEntity<?> getMovieById(@PathVariable String id) throws InterruptedException {
         Movie movie = null;
         switch (id) {
             case "1" -> movie = new Movie("1", "The Matrix", "Lana Wachowski, Lilly Wachowski", 8.7);
-            case "2" -> movie = new Movie("2", "Inception", "Christopher Nolan", 8.8);
+            case "2" -> {
+                Thread.sleep(2000);
+                movie = new Movie("2", "Inception", "Christopher Nolan", 8.8);
+            }
             case "3" -> {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Movie Not Found");
             }

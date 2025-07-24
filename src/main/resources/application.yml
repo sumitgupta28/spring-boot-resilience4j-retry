@@ -2,42 +2,88 @@ logging:
   level:
     org.springframework.boot: ERROR
 
+
+spring:
+  http:
+    codecs:
+      log-request-details: true
+
 management:
+  endpoint:
+    health:
+      show-details: ALWAYS
+  health:
+    circuitbreakers:
+      enabled: true
   endpoints:
     web:
       exposure:
         include: "*"
 
-resilience4j.retry:
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      registerHealthIndicator: true
   instances:
-    simpleRetry:
-      maxAttempts: 3
-      waitDuration: 5s
-    retryOnException:
-      maxAttempts: 4
-      waitDuration: 3s
-      retryExceptions:
+    countBasedCircuitBreaker:   # count-based-circuit-breaker
+      #registerHealthIndicator: true
+      slidingWindowType: COUNT_BASED
+      slidingWindowSize: 5
+      minimumNumberOfCalls: 5
+      permittedNumberOfCallsInHalfOpenState: 3
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+      waitDurationInOpenState: 5000
+      failureRateThreshold: 60
+      eventConsumerBufferSize: 10
+    timeBasedCircuitBreaker:
+      #registerHealthIndicator: true
+      slidingWindowType: TIME_BASED
+      slidingWindowSize: 60
+      minimumNumberOfCalls: 5
+      permittedNumberOfCallsInHalfOpenState: 3
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+      waitDurationInOpenState: 5000
+      failureRateThreshold: 60
+    circuitBreakerOnException:
+      #registerHealthIndicator: true
+      slidingWindowType: COUNT_BASED
+      slidingWindowSize: 5
+      minimumNumberOfCalls: 5
+      permittedNumberOfCallsInHalfOpenState: 3
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+      waitDurationInOpenState: 5000
+      failureRateThreshold: 60
+      recordExceptions:
         - org.springframework.web.client.HttpClientErrorException
       ignoreExceptions:
         - com.example.resilience4j.exception.MovieNotFoundException
-    retryBasedOnConditionalPredicate:
-      maxAttempts: 2
-      waitDuration: 5s
-      resultPredicate: com.example.resilience4j.predicate.ConditionPredicate
-    retryBasedOnExceptionPredicate:
-      maxAttempts: 3
-      waitDuration: 4s
-      retryExceptionPredicate: com.example.resilience4j.predicate.ExceptionPredicate
-    retryUsingExponentialBackoff:
-      maxAttempts: 4
-      waitDuration: 2s
-      enableExponentialBackoff: true
-      exponentialBackoffMultiplier: 2
-    retryUsingRandomizedWait:
-      maxAttempts: 4
-      waitDuration: 2s
-      enableRandomizedWait: true
-      randomizedWaitFactor: 0.7
-    retryWithEventDetails:
-      maxAttempts: 3
-      waitDuration: 5s
+    circuitBreakerWithRecordFailurePredicate:
+      registerHealthIndicator: true
+      slidingWindowType: COUNT_BASED
+      slidingWindowSize: 5
+      minimumNumberOfCalls: 5
+      permittedNumberOfCallsInHalfOpenState: 3
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+      waitDurationInOpenState: 5000
+      failureRateThreshold: 60
+      recordFailurePredicate: com.example.resilience4j.predicate.RecordFailurePredicate
+    circuitBreakerWithIgnoreExceptionPredicate:
+      registerHealthIndicator: true
+      slidingWindowType: COUNT_BASED
+      slidingWindowSize: 5
+      minimumNumberOfCalls: 5
+      permittedNumberOfCallsInHalfOpenState: 3
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+      waitDurationInOpenState: 5000
+      failureRateThreshold: 60
+      ignoreExceptionPredicate: com.example.resilience4j.predicate.IgnoreExceptionPredicate
+    circuitBreakerForSlowCalls:
+      registerHealthIndicator: true
+      slidingWindowType: COUNT_BASED
+      slidingWindowSize: 5
+      minimumNumberOfCalls: 5
+      permittedNumberOfCallsInHalfOpenState: 3
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+      waitDurationInOpenState: 5000
+      slowCallRateThreshold: 60
+      slowCallDurationThreshold: 1000
