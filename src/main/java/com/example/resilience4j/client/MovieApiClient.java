@@ -13,7 +13,7 @@ public class MovieApiClient {
     private RestTemplate restTemplate;
 
     public Movie getMovieDetails(String movieId) throws MovieNotFoundException {
-        String url = "http://localhost:8080/mock/movies/" + movieId;
+        String url = "http://localhost:9090/mock/movies/" + movieId;
         Movie movie = restTemplate.getForObject(url, Movie.class);
         if (movie == null) {
             throw new MovieNotFoundException("Movie with id " + movieId + " not found.");

@@ -21,69 +21,16 @@ management:
         include: "*"
 
 resilience4j.circuitbreaker:
-  configs:
-    default:
-      registerHealthIndicator: true
   instances:
     countBasedCircuitBreaker:   # count-based-circuit-breaker
-      #registerHealthIndicator: true
+      registerHealthIndicator: true
       slidingWindowType: COUNT_BASED
+      ##  If slidingWindowType is COUNT_BASED, slidingWindowSize specifies the number of most recent calls that are recorded and aggregated to calculate the failure rate. For example, a slidingWindowSize of 100 means the last 100 calls are considered.
       slidingWindowSize: 5
-      minimumNumberOfCalls: 5
-      permittedNumberOfCallsInHalfOpenState: 3
-      automaticTransitionFromOpenToHalfOpenEnabled: true
-      waitDurationInOpenState: 5000
-      failureRateThreshold: 60
       eventConsumerBufferSize: 10
-    timeBasedCircuitBreaker:
-      #registerHealthIndicator: true
-      slidingWindowType: TIME_BASED
-      slidingWindowSize: 60
       minimumNumberOfCalls: 5
       permittedNumberOfCallsInHalfOpenState: 3
       automaticTransitionFromOpenToHalfOpenEnabled: true
       waitDurationInOpenState: 5000
       failureRateThreshold: 60
-    circuitBreakerOnException:
-      #registerHealthIndicator: true
-      slidingWindowType: COUNT_BASED
-      slidingWindowSize: 5
-      minimumNumberOfCalls: 5
-      permittedNumberOfCallsInHalfOpenState: 3
-      automaticTransitionFromOpenToHalfOpenEnabled: true
-      waitDurationInOpenState: 5000
-      failureRateThreshold: 60
-      recordExceptions:
-        - org.springframework.web.client.HttpClientErrorException
-      ignoreExceptions:
-        - com.example.resilience4j.exception.MovieNotFoundException
-    circuitBreakerWithRecordFailurePredicate:
-      registerHealthIndicator: true
-      slidingWindowType: COUNT_BASED
-      slidingWindowSize: 5
-      minimumNumberOfCalls: 5
-      permittedNumberOfCallsInHalfOpenState: 3
-      automaticTransitionFromOpenToHalfOpenEnabled: true
-      waitDurationInOpenState: 5000
-      failureRateThreshold: 60
-      recordFailurePredicate: com.example.resilience4j.predicate.RecordFailurePredicate
-    circuitBreakerWithIgnoreExceptionPredicate:
-      registerHealthIndicator: true
-      slidingWindowType: COUNT_BASED
-      slidingWindowSize: 5
-      minimumNumberOfCalls: 5
-      permittedNumberOfCallsInHalfOpenState: 3
-      automaticTransitionFromOpenToHalfOpenEnabled: true
-      waitDurationInOpenState: 5000
-      failureRateThreshold: 60
-      ignoreExceptionPredicate: com.example.resilience4j.predicate.IgnoreExceptionPredicate
-    circuitBreakerForSlowCalls:
-      registerHealthIndicator: true
-      slidingWindowType: COUNT_BASED
-      slidingWindowSize: 5
-      minimumNumberOfCalls: 5
-      permittedNumberOfCallsInHalfOpenState: 3
-      automaticTransitionFromOpenToHalfOpenEnabled: true
-      waitDurationInOpenState: 5000
-      slowCallRateThreshold: 60
-      slowCallDurationThreshold: 1000
+

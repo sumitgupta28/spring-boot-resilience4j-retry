@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="SpringBootResilience4-8080" type="Application" factoryName="Application" singleton="false">
+    <option name="MAIN_CLASS_NAME" value="com.example.resilience4j.SpringBootResilience4jRetryApplication" />
+    <module name="IdeaProjects.spring-boot-resilience4j-retry.main" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.example.resilience4j.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

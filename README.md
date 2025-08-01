@@ -7,7 +7,7 @@ This approach helps maintain the system's overall health and provides fallback m
 ### Successful Response 
 
 ```bash
-curl http://localhost:8080/movies/1
+curl http://localhost:8080/movies/1?requestId=11
 
 {"id":"1","title":"The Matrix","director":"Lana Wachowski, Lilly Wachowski","rating":8.7}
 ```

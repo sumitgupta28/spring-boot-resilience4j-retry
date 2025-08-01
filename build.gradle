@@ -9,7 +9,7 @@ version = '0.0.1-SNAPSHOT'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(17)
 	}
 }
 
@@ -22,16 +22,17 @@ ext {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
 	implementation 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
-	implementation 'io.github.resilience4j:resilience4j-spring-boot3'
-	implementation 'io.github.resilience4j:resilience4j-retry'
-	implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
-	implementation 'org.springframework.boot:spring-boot-starter-aop'
+		implementation 'org.springframework.boot:spring-boot-starter-actuator'
+		implementation 'io.github.resilience4j:resilience4j-spring-boot3'
+		implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+	//implementation 'io.github.resilience4j:resilience4j-retry'
+	//implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
