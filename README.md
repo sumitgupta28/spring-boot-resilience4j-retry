@@ -7,7 +7,7 @@ This approach helps maintain the system's overall health and provides fallback m
 ### Successful Response 
 
 ```bash
-curl http://localhost:8080/movies/1?requestId=11
+curl http://localhost:8080/movies/3
 
 {"id":"1","title":"The Matrix","director":"Lana Wachowski, Lilly Wachowski","rating":8.7}
 ```
@@ -36,8 +36,8 @@ a. count-based-circuit-breaker: countBasedCircuitBreaker circuit breaker instanc
 
 ### Test script
 ```bash
-    for i in {1..100}; do
-      curl --location "http://localhost:8080/movies/3?circuitBreakerType=count-based-circuit-breaker&requestId=$i"
+    for i in {1..5}; do
+      curl --location "http://localhost:8080/movies/4"
       sleep 1
     done
 ```

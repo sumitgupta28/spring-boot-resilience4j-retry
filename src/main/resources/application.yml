@@ -22,15 +22,26 @@ management:
 
 resilience4j.circuitbreaker:
   instances:
-    countBasedCircuitBreaker:   # count-based-circuit-breaker
+    movieServiceCircuitBreaker:   # count-based-circuit-breaker
       registerHealthIndicator: true
       slidingWindowType: COUNT_BASED
       ##  If slidingWindowType is COUNT_BASED, slidingWindowSize specifies the number of most recent calls that are recorded and aggregated to calculate the failure rate. For example, a slidingWindowSize of 100 means the last 100 calls are considered.
-      slidingWindowSize: 5
+      slidingWindowSize: 6
       eventConsumerBufferSize: 10
       minimumNumberOfCalls: 5
       permittedNumberOfCallsInHalfOpenState: 3
       automaticTransitionFromOpenToHalfOpenEnabled: true
-      waitDurationInOpenState: 5000
-      failureRateThreshold: 60
+      waitDurationInOpenState: 5s
+      failureRateThreshold: 50
+resilience4j.retry:
+    instances:
+      movieServiceRetry:
+        max-attempts: 3
+        wait-duration: 5s
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - org.springframework.web.client.RestClientException
+        ignore-exceptions:
+          - org.springframework.web.client.HttpClientErrorException
 

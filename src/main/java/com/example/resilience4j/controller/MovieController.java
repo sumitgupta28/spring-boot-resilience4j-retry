@@ -8,6 +8,8 @@ import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 
 @RestController
 @RequestMapping("/movies")
@@ -18,10 +20,10 @@ public class MovieController {
     private final MovieService movieService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<Movie> getMovieById(@PathVariable String id, @RequestParam(name = "requestId") String requestId) {
-        log.info("requestId {} ", requestId);
-        MDC.put("requestId",requestId);
+    public ResponseEntity<Movie> getMovieById(@PathVariable String id) {
+        MDC.put("requestId",UUID.randomUUID().toString());
         Movie movie = movieService.getMovieDetailsWithCountBasedCircuitBreaker(id);
+        MDC.clear();
         return  ResponseEntity.ok(movie);
     }
 }
